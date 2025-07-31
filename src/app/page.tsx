@@ -102,6 +102,10 @@ export default function Home() {
       alert('Please enter a Student RowID');
       return;
     }
+    
+    // Echo form data to console as JSON
+    console.log('Form Data Submitted:', JSON.stringify(formData, null, 2));
+    
     setShowDashboard(true);
   };
 
