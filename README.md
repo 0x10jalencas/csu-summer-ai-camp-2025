@@ -1,55 +1,96 @@
-## Cal Poly DxHub Group Project
-### Project Category: Retain at Risk
+<!--
+  README.md (simplified)
+-->
 
-**Group 7 Members:**  
-1.  
-2.  
-3.  
-4.  
-5.  
+<p align="center">
+  <img src="docs/media/banner.png" alt="Predicting Attrition Through Housing Data banner" width="80%">
+</p>
 
-**Project Overview:** This project challenges participants to design an AI-powered predictive system that identifies students at risk of attrition based on housing-related factors. Using comprehensive housing data from the StarRez system, participants will develop models to predict which students are more likely to continue their education and graduate successfully. The system aims to identify patterns and correlations that can inform interventions and support programs to improve student retention rates across the CSU system.  
+<p align="center">
+  <a href="#"><img alt="Next.js"       src="https://img.shields.io/badge/next.js-14-black"></a>
+  <a href="#"><img alt="React"         src="https://img.shields.io/badge/react-18-blue"></a>
+  <a href="#"><img alt="TailwindCSS"   src="https://img.shields.io/badge/tailwindcss-3.x-38BDF8"></a>
+  <a href="#"><img alt="Python"        src="https://img.shields.io/badge/python-3.11-yellow"></a>
+  <a href="#"><img alt="AWS Lambda"    src="https://img.shields.io/badge/aws%20lambda-Serverless-orange"></a>
+  <a href="#"><img alt="DynamoDB"      src="https://img.shields.io/badge/dynamodb-NoSQL-4053D6"></a>
+  <a href="#"><img alt="SageMaker"     src="https://img.shields.io/badge/sagemaker-ML-blue"></a>
+  <a href="#"><img alt="Jupyter"       src="https://img.shields.io/badge/jupyter-Notebook-F37626"></a>
+  <a href="#"><img alt="License"       src="https://img.shields.io/badge/license-MIT-green"></a>
+</p>
 
-**Team Project Objectives:**  
-- Develop predictive models using housing data to identify students at risk of attrition  
-- Identify key factors that correlate with successful student outcomes
-- Create actionable insights for housing staff and student success teams
-- Support early intervention strategies to improve retention rates
-- Scale solutions across multiple CSU campuses using StarRez
+# Predicting Student Attrition Through Housing Data
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+An application that hosts an AI predictive model that identifies at-risk San Diego State University (SDSU) students through housing data.
+Uses SDSU's Office of Housing Administration (OHA) Academic Year 23-24 survey datasets to train the AI predictive model.
 
-## Getting Started
 
-First, run the development server:
+## Architecture
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+```mermaid
+graph TB
+  A[React Next.js] --> B[API Gateway]
+  B --> C[AWS Lambda<br/>Python]
+  C --> D[Amazon DynamoDB]
+  C --> E[Amazon SageMaker]
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+* Front end is React running on Next.js.  
+* Lambda serves JSON endpoints and calls SageMaker for predictions.  
+* DynamoDB stores the OHA survey dataset.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## File Layout
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+.
+├── .git/              # Git version control metadata
+├── .gitignore         # Specifies files and folders Git should ignore
+├── .next/             # Next.js build output (auto-generated)
+├── node_modules/      # Installed dependencies (auto-generated)
+├── public/            # Static assets (images, fonts, etc.)
+├── src/               # Application source code (pages, components, styles, etc.)
+├── package.json       # Project manifest (scripts, dependencies, metadata)
+├── package-lock.json  # Lockfile to ensure exact dependency versions
+├── tsconfig.json      # TypeScript configuration
+├── next.config.ts     # Next.js configuration file
+├── postcss.config.mjs # PostCSS setup (e.g., Tailwind CSS plugins)
+├── eslint.config.mjs  # Linting rules and config
+├── next-env.d.ts      # Auto-generated Next.js TypeScript types
+├── README.md          # Project overview and setup instructions
+```
 
-## Learn More
+## Deploy
 
-To learn more about Next.js, take a look at the following resources:
+1. Install Node.js 20 and Python 3.11.  
+2. Configure AWS credentials.  
+3. Build and deploy backend:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+   ```bash
+   cd infrastructure
+   sam build
+   sam deploy --guided        # or: cdk deploy
+   ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+4. Deploy front end:
 
-## Deploy on Vercel
+   ```bash
+   cd web
+   npm install
+   npm run dev
+   npm start
+   ```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Local Development
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+# Front end
+cd web
+npm run dev
+
+# API
+cd ../infrastructure
+sam local start-api
+```
+
+## License
+
+MIT License. See LICENSE file.
