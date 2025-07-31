@@ -1,3 +1,22 @@
+## Cal Poly DxHub Group Project
+### Project Category: Retain at Risk
+
+**Group 7 Members:**  
+1.  
+2.  
+3.  
+4.  
+5.  
+
+**Project Overview:** This project challenges participants to design an AI-powered predictive system that identifies students at risk of attrition based on housing-related factors. Using comprehensive housing data from the StarRez system, participants will develop models to predict which students are more likely to continue their education and graduate successfully. The system aims to identify patterns and correlations that can inform interventions and support programs to improve student retention rates across the CSU system.  
+
+**Team Project Objectives:**  
+- Develop predictive models using housing data to identify students at risk of attrition  
+- Identify key factors that correlate with successful student outcomes
+- Create actionable insights for housing staff and student success teams
+- Support early intervention strategies to improve retention rates
+- Scale solutions across multiple CSU campuses using StarRez
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
