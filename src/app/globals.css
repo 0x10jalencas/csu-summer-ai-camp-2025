@@ -1,14 +1,37 @@
 @import "tailwindcss";
 
+/* Proxima Nova Font Faces */
+@font-face {
+  font-family: 'Proxima Nova';
+  src: url('/proximanova_light.otf') format('opentype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Proxima Nova';
+  src: url('/proximanova_regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --primary-red: #D41736;
+  --red-hover: #B01429;
+  --red-light: #F5E6E9;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --color-primary-red: var(--primary-red);
+  --color-red-hover: var(--red-hover);
+  --color-red-light: var(--red-light);
+  --font-sans: 'Proxima Nova', Arial, Helvetica, sans-serif;
   --font-mono: var(--font-geist-mono);
 }
 
@@ -22,5 +45,20 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Proxima Nova', Arial, Helvetica, sans-serif;
+  font-weight: 300; /* Default to light for all text */
+}
+
+/* Heading styles - use regular weight */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 400; /* Regular weight for headings */
+}
+
+/* Utility classes for explicit font weights */
+.font-light {
+  font-weight: 300 !important;
+}
+
+.font-regular {
+  font-weight: 400 !important;
 }
