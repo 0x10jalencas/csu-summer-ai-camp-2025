@@ -3,7 +3,7 @@
 -->
 
 <p align="center">
-  <img src="public/media/banner.png" alt="Predicting Attrition Through Housing Data banner" width="80%">
+  <img src="public/media/banner.jpg" alt="Predicting Attrition Through Housing Data banner" width="80%">
 </p>
 
 <p align="center">
