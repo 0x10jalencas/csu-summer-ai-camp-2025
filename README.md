@@ -1,11 +1,10 @@
 <!--
-  README.md (simplified)
+  README.md
 -->
 
 <p align="center">
-  <img src="public/media/banner.jpg" alt="Predicting Attrition Through Housing Data banner" width="80%">
+  <img src="public/media/banner.jpg" alt="Predicting Attrition Through Housing Data banner" width="50%">
 </p>
-
 <p align="center">
   <a href="#"><img alt="Next.js"       src="https://img.shields.io/badge/next.js-14-black"></a>
   <a href="#"><img alt="React"         src="https://img.shields.io/badge/react-18-blue"></a>
@@ -16,6 +15,11 @@
   <a href="#"><img alt="SageMaker"     src="https://img.shields.io/badge/sagemaker-ML-blue"></a>
   <a href="#"><img alt="Jupyter"       src="https://img.shields.io/badge/jupyter-Notebook-F37626"></a>
   <a href="#"><img alt="License"       src="https://img.shields.io/badge/license-MIT-green"></a>
+</p>
+
+<p align="center">
+  <img src="public/media/aws_logo.png" alt="Predicting Attrition Through Housing Data banner" width="6.5%">
+  <img src="public/media/dxhub_logo.png" alt="Predicting Attrition Through Housing Data banner" width="6.5%">
 </p>
 
 # Predicting Student Attrition Through Housing Data
