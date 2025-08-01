@@ -1,11 +1,10 @@
 <!--
-  README.md (simplified)
+  README.md
 -->
 
 <p align="center">
-  <img src="public/media/banner.jpg" alt="Predicting Attrition Through Housing Data banner" width="80%">
+  <img src="public/media/banner.jpg" alt="Predicting Attrition Through Housing Data banner" width="50%">
 </p>
-
 <p align="center">
   <a href="#"><img alt="Next.js"       src="https://img.shields.io/badge/next.js-14-black"></a>
   <a href="#"><img alt="React"         src="https://img.shields.io/badge/react-18-blue"></a>
@@ -18,7 +17,15 @@
   <a href="#"><img alt="License"       src="https://img.shields.io/badge/license-MIT-green"></a>
 </p>
 
+<p align="center">
+  <img src="public/media/aws_logo.png" alt="Predicting Attrition Through Housing Data banner" width="6.5%">
+  <img src="public/media/dxhub_logo.png" alt="Predicting Attrition Through Housing Data banner" width="6.5%">
+</p>
+
 # Predicting Student Attrition Through Housing Data
+
+### Contributors: Jess Alencaster, Kenny Garcia, Viridiana Delgado, Mohith Kanthamneni, and Julianna Arias
+
 
 An application that hosts an AI predictive model that identifies at-risk San Diego State University (SDSU) students through housing data.
 Uses SDSU's Office of Housing Administration (OHA) Academic Year 23-24 survey datasets to train the AI predictive model.
