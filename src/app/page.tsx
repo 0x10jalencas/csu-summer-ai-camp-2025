@@ -95,168 +95,31 @@ export default function Home() {
     wellBeingResources: 'Did not answer',
   });
 
-  const calculateAttritionProbability = (data: FormData): number => {
-    let riskScore = 0;
-    
-    // Mental health factors (higher weight)
-    const getMentalHealthRisk = (rating: string) => {
-      const riskMap = {
-        'Excellent': 0,
-        'Good': 2,
-        'Neutral': 5,
-        'Poor': 8,
-        'Very poor': 12
-      };
-      return riskMap[rating as keyof typeof riskMap] || 5;
-    };
-    
-    riskScore += getMentalHealthRisk(data.mentalHealthRating);
-    riskScore += data.avoidConfrontation ? 3 : 0;
-    
-    const getSenseOfBelongingRisk = (rating: string) => {
-      const riskMap = {
-        'Agree': 0,
-        'Neutral': 3,
-        'Disagree': 6
-      };
-      return riskMap[rating as keyof typeof riskMap] || 3;
-    };
-    
-    riskScore += getSenseOfBelongingRisk(data.senseOfBelonging);
-    riskScore += data.roomRequest ? 2 : 0;
-    
-    // Nutritional health
-    // Convert frequency strings to risk scores
-    const getFrequencyRisk = (frequency: string, isPositive: boolean = false) => {
-      const riskMap = {
-        '0 Times': isPositive ? 3 : 0,
-        '1-5 Times': isPositive ? 2 : 1,
-        '6-10 Times': isPositive ? 1 : 2,
-        'More than 10 Times': isPositive ? 0 : 3
-      };
-      return riskMap[frequency as keyof typeof riskMap] || 1;
-    };
-    
-    riskScore += getFrequencyRisk(data.eatingHabits, false); // Poor eating habits = risk
-    riskScore += getFrequencyRisk(data.eatingAlone, false); // Eating alone frequently = risk
-    riskScore += getFrequencyRisk(data.eatingWithFriends, true); // Eating with friends frequently = protective
-    riskScore += getFrequencyRisk(data.preparedMealAlone, false); // Preparing meals alone frequently = risk
-    riskScore += (5 - data.nutritionalConfidence) * 1.5;
-    
-    // Job/engagement factors (protective)
-    riskScore += data.jobOnCampus ? -3 : 1;
-    riskScore += data.jobOffCampus ? -1 : 0;
-    riskScore += data.internshipOnCampus ? -4 : 0;
-    riskScore += data.internshipOffCampus ? -2 : 0;
-    riskScore += data.undergradResearch ? -5 : 0;
-    
-    // Social engagement
-    riskScore += data.attendedEvent ? -2 : 2;
-    
-    // Conflict and support
-    const getRoommateConflictRisk = (rating: string) => {
-      const riskMap = {
-        'Disagree': 0, // No conflicts = no risk
-        'Neutral': 3,  // Some conflicts = moderate risk
-        'Agree': 6     // Has conflicts = higher risk
-      };
-      return riskMap[rating as keyof typeof riskMap] || 3;
-    };
-    
-    riskScore += getRoommateConflictRisk(data.roommateConflicts);
-    
-    const getSeekingAdviceRisk = (rating: string) => {
-      const riskMap = {
-        'Agree': 0,     // Seeks advice from family = protective
-        'Neutral': 2,   // Sometimes seeks advice = moderate
-        'Disagree': 4   // Doesn't seek advice = higher risk
-      };
-      return riskMap[rating as keyof typeof riskMap] || 2;
-    };
-    
-    riskScore += getSeekingAdviceRisk(data.seekingAdvice);
-    
-    // Additional social support factors
-    riskScore += data.seekAssistanceRHC === 'Disagree' ? 2 : data.seekAssistanceRHC === 'Agree' ? -1 : 0;
-    riskScore += data.seekAssistanceRA === 'Disagree' ? 2 : data.seekAssistanceRA === 'Agree' ? -1 : 0;
-    riskScore += data.useSharedLivingAgreement === 'Disagree' ? 1.5 : data.useSharedLivingAgreement === 'Agree' ? -1 : 0;
-    riskScore += data.seekAdviceFamily === 'Disagree' ? 3 : data.seekAdviceFamily === 'Agree' ? -2 : 0;
-    riskScore += data.initiateOpenCommunication === 'Disagree' ? 2.5 : data.initiateOpenCommunication === 'Agree' ? -1.5 : 0;
-    riskScore += data.roommateRelationship === 'Unsatisfied' ? 4 : data.roommateRelationship === 'Satisfied' ? -2 : 0;
-    riskScore += data.suiteApartmentOccupants === 1 ? 2 : data.suiteApartmentOccupants >= 5 ? 1 : 0;
-    
-    // Convert to probability (0-100%)
-    const probability = Math.max(0, Math.min(100, (riskScore / 50) * 100));
-    return Math.round(probability * 10) / 10;
-  };
 
 
   // Interpret SageMaker's raw prediction value
   const interpretSageMakerPrediction = (rawValue: number): {
     rawValue: number;
-    sigmoidProbability: number;
-    normalizedProbability: number;
-    suggestedInterpretation: string;
-    note: string;
     riskCategory: string;
-    recommendedAction: string;
   } => {
     // The model returns a raw logit value (e.g., 3.698)
-    // Higher positive values = higher probability of student attrition
-    
-    // Option 1: If it's already a sigmoid output (0-1), use directly
-    if (rawValue >= 0 && rawValue <= 1) {
-      return {
-        rawValue: rawValue,
-        sigmoidProbability: rawValue * 100,
-        normalizedProbability: rawValue * 100,
-        suggestedInterpretation: rawValue > 0.7 ? 'Higher Risk' : rawValue > 0.4 ? 'Moderate Risk' : 'Lower Risk',
-        note: 'Direct probability from sigmoid output',
-        riskCategory: rawValue > 0.7 ? 'Critical' : rawValue > 0.4 ? 'Moderate' : 'Low',
-        recommendedAction: rawValue > 0.7 ? 'Immediate intervention needed' : rawValue > 0.4 ? 'Monitor closely' : 'Continue standard support'
-      };
-    }
-    
-    // Option 2: Raw logit from neural network - apply sigmoid function
-    const sigmoid = (x: number) => 1 / (1 + Math.exp(-x));
-    const sigmoidProb = sigmoid(rawValue);
-    
-    // Logit interpretation for student attrition:
-    // < -2: Very low risk (< 12% attrition probability)
-    // -2 to 0: Low risk (12-50% attrition probability)  
-    // 0 to 2: Moderate risk (50-88% attrition probability)
-    // > 2: High risk (> 88% attrition probability)
+    // Higher positive values = higher risk level
     
     let riskCategory: string;
-    let recommendedAction: string;
-    let interpretation: string;
     
     if (rawValue < -1) {
       riskCategory = 'Low Risk';
-      interpretation = 'Low Risk';
-      recommendedAction = 'Continue standard academic support';
     } else if (rawValue < 1) {
       riskCategory = 'Moderate Risk';
-      interpretation = 'Moderate Risk';
-      recommendedAction = 'Increase engagement and monitoring';
     } else if (rawValue < 2.5) {
       riskCategory = 'High Risk';
-      interpretation = 'High Risk';
-      recommendedAction = 'Immediate intervention and support services';
     } else {
       riskCategory = 'Critical Risk';
-      interpretation = 'Critical Risk';
-      recommendedAction = 'Urgent comprehensive intervention required';
     }
     
     return {
       rawValue: rawValue,
-      sigmoidProbability: sigmoidProb * 100,
-      normalizedProbability: Math.max(0, Math.min(100, (rawValue + 3) / 6 * 100)), // Scale -3 to 3 → 0-100%
-      suggestedInterpretation: interpretation,
-      note: `Logit: ${rawValue.toFixed(3)} → Sigmoid: ${(sigmoidProb * 100).toFixed(1)}% attrition probability`,
-      riskCategory: riskCategory,
-      recommendedAction: recommendedAction
+      riskCategory: riskCategory
     };
   };
 
@@ -369,8 +232,6 @@ export default function Home() {
   };
 
   if (showDashboard) {
-    const attritionProbability = calculateAttritionProbability(formData);
-    
     return (
       <div className="min-h-screen bg-gray-50">
         {/* Header with SDSU Logo */}
@@ -396,6 +257,19 @@ export default function Home() {
               <div>
                 <h1 className="text-4xl font-regular text-gray-900 mb-2">Student Risk Analysis</h1>
                 <p className="text-xl font-light text-gray-600">AI Prediction Model Results</p>
+                {predictionResult && predictionResult.predictions && predictionResult.predictions[0] && (
+                  <div className={`mt-4 p-4 rounded-lg ${
+                    (1 / (1 + Math.exp(-predictionResult.predictions[0][0])) * 100) > 70 
+                      ? 'bg-red-100 border border-primary-red' 
+                      : (1 / (1 + Math.exp(-predictionResult.predictions[0][0])) * 100) > 40 
+                        ? 'bg-yellow-100 border border-yellow-500' 
+                        : 'bg-green-100 border border-green-500'
+                  }`}>
+                    <p className="text-2xl font-regular text-black">
+                      Attrition Risk: {(1 / (1 + Math.exp(-predictionResult.predictions[0][0])) * 100).toFixed(1)}%
+                    </p>
+                  </div>
+                )}
               </div>
               <div className="text-right">
                 <p className="text-sm font-light text-gray-500">Student RowID</p>
@@ -409,17 +283,7 @@ export default function Home() {
               </div>
             </div>
             
-            {/* Attrition Risk Alert */}
-            <div className={`p-6 rounded-lg mb-8 ${attritionProbability > 70 ? 'bg-red-100 border border-primary-red' : attritionProbability > 40 ? 'bg-yellow-100 border border-yellow-500' : 'bg-green-100 border border-green-500'}`}>
-              <h2 className="text-2xl font-regular mb-2 text-black">
-                Attrition Risk: {attritionProbability}%
-              </h2>
-              <p className="font-light text-black">
-                {attritionProbability > 70 ? 'High Risk - Immediate intervention recommended' : 
-                 attritionProbability > 40 ? 'Moderate Risk - Additional support suggested' : 
-                 'Low Risk - Continue current support'}
-              </p>
-            </div>
+
 
             {/* Assessment Results Grid */}
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -480,7 +344,7 @@ export default function Home() {
             {/* SageMaker Prediction Results */}
             {predictionResult && (
               <div className="bg-blue-50 rounded-xl shadow-lg p-8 mt-8">
-                <h2 className="text-3xl font-regular text-blue-700 mb-4">🤖 AI Model Prediction</h2>
+                <h2 className="text-3xl font-regular text-blue-700 mb-4">AI Model Prediction</h2>
                 
                 {/* Interpreted Results */}
                 {predictionResult.predictions && predictionResult.predictions[0] && predictionResult.predictions[0][0] !== undefined && (
@@ -494,34 +358,23 @@ export default function Home() {
                           return (
                             <>
                               <div className="flex justify-between">
-                                <span className="font-light text-gray-600">Raw Prediction:</span>
+                                <span className="font-light text-gray-600">Raw Model Output:</span>
                                 <span className="font-regular text-black">{rawValue.toFixed(4)}</span>
                               </div>
                               <div className="flex justify-between">
                                 <span className="font-light text-gray-600">Sigmoid Probability:</span>
-                                <span className="font-regular text-black">{interpretation.sigmoidProbability.toFixed(1)}%</span>
+                                <span className="font-regular text-black">{(1 / (1 + Math.exp(-rawValue)) * 100).toFixed(1)}%</span>
                               </div>
                               <div className="flex justify-between">
                                 <span className="font-light text-gray-600">Risk Assessment:</span>
                                 <span className={`font-regular ${
-                                  interpretation.riskCategory === 'Critical Risk' ? 'text-red-700' : 
-                                  interpretation.riskCategory === 'High Risk' ? 'text-red-600' : 
+                                  interpretation.riskCategory === 'Critical Risk' ? 'text-primary-red' : 
+                                  interpretation.riskCategory === 'High Risk' ? 'text-primary-red' : 
                                   interpretation.riskCategory === 'Moderate Risk' ? 'text-yellow-600' : 
                                   'text-green-600'
                                 }`}>
                                   {interpretation.riskCategory}
                                 </span>
-                              </div>
-                              <div className="pt-3 border-t border-gray-200">
-                                <p className="font-light text-gray-600 text-sm mb-2">Recommended Action:</p>
-                                <p className="font-regular text-black text-sm bg-blue-50 p-2 rounded">
-                                  {interpretation.recommendedAction}
-                                </p>
-                              </div>
-                              <div className="pt-2">
-                                <p className="font-light text-gray-500 text-xs">
-                                  {interpretation.note}
-                                </p>
                               </div>
                             </>
                           );
@@ -536,7 +389,7 @@ export default function Home() {
                           <>
                             <div className="flex justify-between">
                               <span className="font-light text-gray-600">Features Used:</span>
-                              <span className="font-regular text-black">{predictionResult.metadata.featuresCount || 'N/A'}/23</span>
+                              <span className="font-regular text-black">{predictionResult.metadata.featuresCount || 'N/A'}/22</span>
                             </div>
                             <div className="flex justify-between">
                               <span className="font-light text-gray-600">Model Type:</span>
@@ -544,7 +397,7 @@ export default function Home() {
                             </div>
                             <div className="flex justify-between">
                               <span className="font-light text-gray-600">Status:</span>
-                              <span className="font-regular text-green-600">✅ Success</span>
+                              <span className="font-regular text-green-600">Success</span>
                             </div>
                           </>
                         )}
@@ -556,7 +409,7 @@ export default function Home() {
                 {/* Raw JSON for debugging */}
                 <details className="bg-white rounded-lg p-6">
                   <summary className="font-regular text-blue-700 cursor-pointer mb-4">
-                    🔧 Raw API Response (for debugging)
+                    Raw API Response (for debugging)
                   </summary>
                   <pre className="font-light text-black overflow-auto text-sm bg-gray-50 p-4 rounded">
                     {JSON.stringify(predictionResult, null, 2)}
@@ -568,6 +421,7 @@ export default function Home() {
         </main>
       </div>
     );
+  
   }
 
   if (showForm) {
