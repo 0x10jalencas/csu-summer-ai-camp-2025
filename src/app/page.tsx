@@ -33,7 +33,7 @@ interface FormData {
   
   // Other factors
   roommateConflicts: string; // Agree, Neutral, Disagree
-  seekingAdvice: number;
+  seekingAdvice: string; // Agree, Neutral, Disagree
   
   // Additional Social & Support factors
   seekAssistanceRHC: string; // Agree/Neutral/Disagree
@@ -67,7 +67,7 @@ export default function Home() {
     undergradResearch: false,
     attendedEvent: false,
     roommateConflicts: 'Neutral',
-    seekingAdvice: 3,
+    seekingAdvice: 'Neutral',
     seekAssistanceRHC: 'Neutral',
     seekAssistanceRA: 'Neutral',
     useSharedLivingAgreement: 'Neutral',
@@ -146,7 +146,17 @@ export default function Home() {
     };
     
     riskScore += getRoommateConflictRisk(data.roommateConflicts);
-    riskScore += data.seekingAdvice > 7 ? 3 : 0;
+    
+    const getSeekingAdviceRisk = (rating: string) => {
+      const riskMap = {
+        'Agree': 0,     // Seeks advice from family = protective
+        'Neutral': 2,   // Sometimes seeks advice = moderate
+        'Disagree': 4   // Doesn't seek advice = higher risk
+      };
+      return riskMap[rating as keyof typeof riskMap] || 2;
+    };
+    
+    riskScore += getSeekingAdviceRisk(data.seekingAdvice);
     
     // Additional social support factors
     riskScore += data.seekAssistanceRHC === 'Disagree' ? 2 : data.seekAssistanceRHC === 'Agree' ? -1 : 0;
@@ -275,7 +285,7 @@ export default function Home() {
                 <div className="space-y-2 font-light text-black">
                   <p>Has Attended Campus Events: {formData.attendedEvent ? 'Yes' : 'No'}</p>
                   <p>Has Roommate Conflicts: {formData.roommateConflicts}</p>
-                  <p>Frequency Seeking Advice: {formData.seekingAdvice}/10</p>
+                  <p>Seeks Advice from Parents/Family: {formData.seekingAdvice}</p>
                   <p>Seeks Assistance from RHC: {formData.seekAssistanceRHC}</p>
                   <p>Seeks Assistance from RA/CA: {formData.seekAssistanceRA}</p>
                   <p>Uses Shared Living Agreement: {formData.useSharedLivingAgreement}</p>
@@ -558,16 +568,16 @@ export default function Home() {
                   </div>
                   
                   <div>
-                    <label className="block font-regular text-gray-700 mb-2">How often student seeks advice (1-10)</label>
-                    <input
-                      type="range"
-                      min="1"
-                      max="10"
+                    <label className="block font-regular text-gray-700 mb-2">Student seeks advice from parents or family</label>
+                    <select
                       value={formData.seekingAdvice}
-                      onChange={(e) => handleInputChange('seekingAdvice', parseInt(e.target.value))}
-                      className="w-full"
-                    />
-                    <span className="font-light text-sm text-black">Current: {formData.seekingAdvice}</span>
+                      onChange={(e) => handleInputChange('seekingAdvice', e.target.value)}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-red focus:border-transparent font-light text-black"
+                    >
+                      <option value="Agree">Agree</option>
+                      <option value="Neutral">Neutral</option>
+                      <option value="Disagree">Disagree</option>
+                    </select>
                   </div>
                   
                   <div>
