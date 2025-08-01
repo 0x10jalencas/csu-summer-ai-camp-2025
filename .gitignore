@@ -39,3 +39,37 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+
+###############################################################################
+# 💻 Local dev & build output
+###############################################################################
+.next/                  # Next.js build dir
+node_modules/           # Node packages (already ignored by some templates)
+
+###############################################################################
+# 🧪 Experiments & one-off payloads
+###############################################################################
+payload.json
+response.json
+bundle/                 # temp packaging dir
+*.tar.gz                # model or data archives
+model*/                 # trained-model folders (model22/, etc.)
+
+###############################################################################
+# 📊 Raw data & generated assets
+###############################################################################
+data/                   # local CSVs or datasets
+*.pth                   # PyTorch checkpoint files
+
+###############################################################################
+# 🔑 Environment / credentials
+###############################################################################
+.env*                   # .env, .env.local, .env.staging, etc.
+
+###############################################################################
+# 🖥️  macOS / Editor cruft
+###############################################################################
+.DS_Store
+*.swp
+*.swo
