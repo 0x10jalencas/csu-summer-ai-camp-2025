@@ -1,0 +1,118 @@
+{
+    "features": [
+      { "name": "Eat at an on campus eatery (Food trucks, restaurants, food court)",
+        "type": "ordinal",
+        "mapping": { "0 Times":0,"1-5 Times":1,"6-10 Times":2,"Did not answer":3,"More than 10 Times":4 } },
+  
+      { "name": "Prepared a meal on my own",
+        "type": "ordinal",
+        "mapping": { "0 Times":0,"1-5 Times":1,"6-10 Times":2,"Did not answer":3,"More than 10 Times":4 } },
+  
+      { "name": "Eat with friends",
+        "type": "ordinal",
+        "mapping": { "0 Times":0,"1-5 Times":1,"6-10 Times":2,"Did not answer":3,"More than 10 Times":4 } },
+  
+      { "name": "Eat alone",
+        "type": "ordinal",
+        "mapping": { "0 Times":0,"1-5 Times":1,"6-10 Times":2,"Did not answer":3,"More than 10 Times":4 } },
+  
+      { "name": "how confident are you in preparing a nutritious, healthy meal for yourself?",
+        "type": "numeric",
+        "range": [1,5] },
+  
+      { "name": "Worked a job on campus",
+        "type": "categorical",
+        "mapping": { "Did not answer":0,"No":1,"Not Applicable":2,"Yes":3 } },
+  
+      { "name": "Worked a job off campus",
+        "type": "categorical",
+        "mapping": { "Did not answer":0,"No":1,"Not Applicable":2,"Yes":3 } },
+  
+      { "name": "Participated in an internship off campus",
+        "type": "categorical",
+        "mapping": { "Did not answer":0,"No":1,"Not Applicable":2,"Yes":3 } },
+  
+      { "name": "Participated in an internship on campus",
+        "type": "categorical",
+        "mapping": { "Did not answer":0,"No":1,"Not Applicable":2,"Yes":3 } },
+  
+      { "name": "Participated in undergraduate research",
+        "type": "categorical",
+        "mapping": { "Did not answer":0,"No":1,"Not Applicable":2,"Yes":3 } },
+  
+      { "name": "How would you rate your mental health during the last 30 days?",
+        "type": "ordinal",
+        "mapping": { "Did not answer":0,"Excellent":1,"Good":2,"Neutral":3,"Poor":4,"Very poor":5 } },
+  
+      { "name": "I avoid conflict or confrontation, so I don't address the issue.",
+        "type": "categorical",
+        "mapping": { "Agree":0,"Did not answer":1,"Disagree":2,"Neutral":3 } },
+  
+      { "name": "Feeling a sense of belonging within the university community (Sense of belonging is the feeling that we have satisfied our emotional need to belong to a community or group because we feel accepted, included, respected, and supported by a group)",
+        "type": "categorical",
+        "mapping": { "Agree":0,"Did not answer":1,"Disagree":2,"Neutral":3 } },
+  
+      { "name": "My roommate(s) and I do not have any conflicts",
+        "type": "categorical",
+        "mapping": { "Agree":0,"Did not answer":1,"Disagree":2,"Neutral":3 } },
+  
+      { "name": "I have submitted a room switch request due to a roommate conflict",
+        "type": "categorical",
+        "mapping": { "Agree":0,"Did not answer":1,"Disagree":2,"Neutral":3 } },
+  
+      { "name": "I seek assistance from my residence hall coordinator (RHC)",
+        "type": "categorical",
+        "mapping": { "Agree":0,"Did not answer":1,"Disagree":2,"Neutral":3 } },
+  
+      { "name": "I seek assistance from my student leader (RA or CA)",
+        "type": "categorical",
+        "mapping": { "Agree":0,"Did not answer":1,"Disagree":2,"Neutral":3 } },
+  
+      { "name": "I use the Shared Living Agreement to guide discussion/conversation",
+        "type": "categorical",
+        "mapping": { "Agree":0,"Did not answer":1,"Disagree":2,"Neutral":3 } },
+  
+      { "name": "I seek advice from my parents or family",
+        "type": "categorical",
+        "mapping": { "Agree":0,"Did not answer":1,"Disagree":2,"Neutral":3 } },
+  
+      { "name": "I initiate open communication and discussion",
+        "type": "categorical",
+        "mapping": { "Agree":0,"Did not answer":1,"Disagree":2,"Neutral":3 } },
+  
+      { "name": "In the last 30 days, how would you describe your relationship with your roommate(s)? - Selected Choice",
+        "type": "ordinal",
+        "mapping": { "Did not answer":0,"Neutral":1,"Other":2,"Satisfied":3,"Unsatisfied":4 } },
+  
+      { "name": "How many total people live in your suite or apartment unit?",
+        "type": "ordinal",
+        "mapping": { "1, only me":0,"2, including myself":1,"3, including myself":2,"4, including myself":3,"Did not answer":4,"More than 5, including myself":5 } }
+    ],
+  
+    "order": [
+      "Eat at an on campus eatery (Food trucks, restaurants, food court)",
+      "Prepared a meal on my own",
+      "Eat with friends",
+      "Eat alone",
+      "how confident are you in preparing a nutritious, healthy meal for yourself?",
+      "Worked a job on campus",
+      "Worked a job off campus",
+      "Participated in an internship off campus",
+      "Participated in an internship on campus",
+      "Participated in undergraduate research",
+      "How would you rate your mental health during the last 30 days?",
+      "I avoid conflict or confrontation, so I don't address the issue.",
+      "Feeling a sense of belonging within the university community (Sense of belonging is the feeling that we have satisfied our emotional need to belong to a community or group because we feel accepted, included, respected, and supported by a group)",
+      "My roommate(s) and I do not have any conflicts",
+      "I have submitted a room switch request due to a roommate conflict",
+      "I seek assistance from my residence hall coordinator (RHC)",
+      "I seek assistance from my student leader (RA or CA)",
+      "I use the Shared Living Agreement to guide discussion/conversation",
+      "I seek advice from my parents or family",
+      "I initiate open communication and discussion",
+      "In the last 30 days, how would you describe your relationship with your roommate(s)? - Selected Choice",
+      "How many total people live in your suite or apartment unit?"
+    ],
+  
+    "label": "attrition"
+  }
