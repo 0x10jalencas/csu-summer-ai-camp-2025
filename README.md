@@ -24,6 +24,9 @@
 
 # Predicting Student Attrition Through Housing Data
 
+### Contributors: Jess Alencaster, Kenny Garcia, Viridiana Delgado, Mohith Kanthamneni, and Julianna Arias
+
+
 An application that hosts an AI predictive model that identifies at-risk San Diego State University (SDSU) students through housing data.
 Uses SDSU's Office of Housing Administration (OHA) Academic Year 23-24 survey datasets to train the AI predictive model.
 
