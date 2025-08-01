@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { InvokeEndpointCommand, SageMakerRuntimeClient } from '@aws-sdk/client-sagemaker-runtime';
+import { InvokeEndpointCommand } from '@aws-sdk/client-sagemaker-runtime';
+import { client } from '@/lib/predict';
 
 /**
  * POST /api/predict
@@ -52,7 +53,7 @@ export async function POST(req: NextRequest) {
     }
 
     const region = process.env.AWS_REGION;
-    const endpointName = process.env.SAGEMAKER_ENDPOINT_NAME ?? 'pytorch-inference-2025-08-01-02-22-44-558';
+    const endpointName = process.env.SAGEMAKER_ENDPOINT_NAME ?? 'student-risk-22f-sigmoid-endpoint-1754044496';
     const mockMode = process.env.MOCK_PREDICTION;
     const hasAwsCredentials = !!(process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY);
 
@@ -93,21 +94,28 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // Initialize SageMaker Runtime client
-    const client = new SageMakerRuntimeClient({ region });
+    // === SENDING TO SAGEMAKER ===
 
-    // CONFIRMED: Model expects exactly 10 features (based on successful testing)
-    console.log('🔍 [API DEBUG] ============ SENDING TO SAGEMAKER ============');
+    // === Build request body =================================================
+    // Our Sigmoid‑Neuron model now expects **all 22 encoded features** in the
+    // exact order produced by the shared encoder.
+    const originalFeatures: unknown[] = Array.isArray(payload.features)
+      ? payload.features
+      : [];
 
-    const originalFeatures = payload.features || [];
-    console.log('🔍 [API DEBUG] Original features length:', originalFeatures.length);
-    
-    // Use only first 10 features (the ones the model was trained with)
-    const modelFeatures = originalFeatures.slice(0, 10);
-    console.log('🔍 [API DEBUG] Using first 10 features:', modelFeatures);
-    
-    // Send as direct array (the format that worked in testing)
-    const requestData = modelFeatures;
+    console.log('🔍 [API DEBUG] Incoming features length:', originalFeatures.length);
+    if (originalFeatures.length !== 22) {
+      return NextResponse.json(
+        {
+          error: `Model expects 22 features, received ${originalFeatures.length}.`,
+          receivedLength: originalFeatures.length,
+        },
+        { status: 400 }
+      );
+    }
+
+    // Sagemaker inference container accepts the raw array as JSON.
+    const requestData = originalFeatures;
 
     try {
       const command = new InvokeEndpointCommand({
@@ -131,11 +139,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({
         ...parsedResponse,
         metadata: {
-          featuresUsed: modelFeatures,
-          featuresCount: modelFeatures.length,
-          originalFeaturesCount: originalFeatures.length,
+          featuresUsed: originalFeatures,
+          featuresCount: originalFeatures.length,
           modelType: 'sigmoid_neuron',
-          success: true
+          success: true,
         }
       });
       

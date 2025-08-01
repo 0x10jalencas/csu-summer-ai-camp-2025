@@ -1,0 +1,6 @@
+{
+  "input_size": 22,
+  "hidden_size": 64,
+  "output_size": 1,
+  "model_type": "sigmoid_neuron"
+}

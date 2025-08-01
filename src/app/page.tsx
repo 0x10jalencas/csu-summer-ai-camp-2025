@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useState } from "react";
+import { encodeRow } from "@/lib/encoder";
 
 interface FormData {
   // Student Identifier
@@ -189,152 +190,6 @@ export default function Home() {
     return Math.round(probability * 10) / 10;
   };
 
-  // Transform form data to model's expected 10-feature array
-  const transformToModelFeatures = (data: FormData): number[] => {
-    console.log('🔍 [FRONTEND DEBUG] ============ FEATURE TRANSFORMATION DEBUG ============');
-    console.log('🔍 [FRONTEND DEBUG] Input form data:', JSON.stringify(data, null, 2));
-    // Feature mappings based on LabelEncoder alphabetical sorting
-    // NOTE: Model uses only first 10 features (eating patterns + employment/activities + mental health)
-    
-    // 1-4: Frequency features (eating patterns)
-    const getFrequencyCode = (freq: string): number => {
-      const map: { [key: string]: number } = {
-        '0 Times': 0,
-        '1-5 Times': 1,
-        '6-10 Times': 2,
-        'Did not answer': 3,
-        'More than 10 Times': 4
-      };
-      return map[freq] ?? 3; // Default to "Did not answer"
-    };
-
-    // 6-10: Employment/Activities
-    const getBooleanCode = (value: boolean): number => {
-      // "Did not answer"→0, "No"→1, "Not Applicable"→2, "Yes"→3
-      return value ? 3 : 1; // Yes→3, No→1
-    };
-
-    // 11: Mental Health
-    const getMentalHealthCode = (rating: string): number => {
-      const map: { [key: string]: number } = {
-        'Did not answer': 0,
-        'Excellent': 1,
-        'Good': 2,
-        'Neutral': 3,
-        'Poor': 4,
-        'Very poor': 5
-      };
-      return map[rating] ?? 0;
-    };
-
-    // 12-20: Agree/Disagree features
-    const getAgreeDisagreeCode = (value: string): number => {
-      const map: { [key: string]: number } = {
-        'Agree': 0,
-        'Did not answer': 1,
-        'Disagree': 2,
-        'Neutral': 3
-      };
-      return map[value] ?? 1;
-    };
-
-    // 21: Roommate relationship
-    const getRoommateRelationshipCode = (value: string): number => {
-      const map: { [key: string]: number } = {
-        'Did not answer': 0,
-        'Neutral': 1, // "Neutral, I don't interact with my roommates, but we can coexist in the same space."
-        'Other': 2,   // "Other, please specify"
-        'Satisfied': 3, // "Satisfied, most of us get along well and we usually work together to resolve conflicts."
-        'Unsatisfied': 4 // "Unsatisfied, most of us don't get along well, and we usually are not able to resolve conflicts."
-      };
-      return map[value] ?? 0;
-    };
-
-    // 22: Suite occupants
-    const getSuiteOccupantsCode = (count: number): number => {
-      const map: { [key: number]: number } = {
-        1: 0, // "1, only me"
-        2: 1, // "2, including myself"
-        3: 2, // "3, including myself"
-        4: 3, // "4, including myself"
-        5: 5  // "More than 5, including myself" (note: 4 is "Did not answer")
-      };
-      return map[count] ?? 4; // Default to "Did not answer"
-    };
-
-    // 23: Well-being resources (for now, default to "Did not answer" = 0)
-    const getWellBeingCode = (response: string): number => {
-      // This would need the full 127-item mapping, for now default to "Did not answer"
-      return response === 'Did not answer' ? 0 : 0; // Placeholder
-    };
-
-    // Calculate all features with debugging
-    const features = [
-      getFrequencyCode(data.eatingHabits),                    // 1
-      getFrequencyCode(data.preparedMealAlone),               // 2
-      getFrequencyCode(data.eatingWithFriends),               // 3
-      getFrequencyCode(data.eatingAlone),                     // 4
-      data.nutritionalConfidence,                             // 5 (numerical, no encoding)
-      getBooleanCode(data.jobOnCampus),                       // 6
-      getBooleanCode(data.jobOffCampus),                      // 7
-      getBooleanCode(data.internshipOffCampus),               // 8
-      getBooleanCode(data.internshipOnCampus),                // 9
-      getBooleanCode(data.undergradResearch),                 // 10
-      getMentalHealthCode(data.mentalHealthRating),           // 11
-      getAgreeDisagreeCode(data.avoidConfrontation ? 'Agree' : 'Disagree'), // 12
-      getAgreeDisagreeCode(data.senseOfBelonging),            // 13
-      getAgreeDisagreeCode(data.roommateConflicts === 'Disagree' ? 'Agree' : 'Disagree'), // 14 (inverted)
-      getAgreeDisagreeCode(data.roomRequest ? 'Agree' : 'Disagree'), // 15
-      getAgreeDisagreeCode(data.seekAssistanceRHC),           // 16
-      getAgreeDisagreeCode(data.seekAssistanceRA),            // 17
-      getAgreeDisagreeCode(data.useSharedLivingAgreement),    // 18
-      getAgreeDisagreeCode(data.seekAdviceFamily),            // 19
-      getAgreeDisagreeCode(data.initiateOpenCommunication),   // 20
-      getRoommateRelationshipCode(data.roommateRelationship), // 21
-      getSuiteOccupantsCode(data.suiteApartmentOccupants),    // 22
-      getWellBeingCode(data.wellBeingResources)               // 23
-    ];
-
-    console.log('🔍 [FRONTEND DEBUG] Generated features array (length=' + features.length + '):', features);
-    console.log('🔍 [FRONTEND DEBUG] Feature mapping breakdown:');
-    console.log('  1. Eating habits (' + data.eatingHabits + ') → ' + getFrequencyCode(data.eatingHabits));
-    console.log('  2. Prepared meal alone (' + data.preparedMealAlone + ') → ' + getFrequencyCode(data.preparedMealAlone));
-    console.log('  3. Eating with friends (' + data.eatingWithFriends + ') → ' + getFrequencyCode(data.eatingWithFriends));
-    console.log('  4. Eating alone (' + data.eatingAlone + ') → ' + getFrequencyCode(data.eatingAlone));
-    console.log('  5. Nutritional confidence (' + data.nutritionalConfidence + ') → ' + data.nutritionalConfidence);
-    console.log('  6. Job on campus (' + data.jobOnCampus + ') → ' + getBooleanCode(data.jobOnCampus));
-    console.log('  7. Job off campus (' + data.jobOffCampus + ') → ' + getBooleanCode(data.jobOffCampus));
-    console.log('  8. Internship off campus (' + data.internshipOffCampus + ') → ' + getBooleanCode(data.internshipOffCampus));
-    console.log('  9. Internship on campus (' + data.internshipOnCampus + ') → ' + getBooleanCode(data.internshipOnCampus));
-    console.log(' 10. Undergrad research (' + data.undergradResearch + ') → ' + getBooleanCode(data.undergradResearch));
-    console.log(' 11. Mental health (' + data.mentalHealthRating + ') → ' + getMentalHealthCode(data.mentalHealthRating));
-    console.log(' 12. Avoid confrontation (' + data.avoidConfrontation + ') → ' + getAgreeDisagreeCode(data.avoidConfrontation ? 'Agree' : 'Disagree'));
-    console.log(' 13. Sense of belonging (' + data.senseOfBelonging + ') → ' + getAgreeDisagreeCode(data.senseOfBelonging));
-    console.log(' 14. Roommate conflicts [INVERTED] (' + data.roommateConflicts + ') → ' + getAgreeDisagreeCode(data.roommateConflicts === 'Disagree' ? 'Agree' : 'Disagree'));
-    console.log(' 15. Room request (' + data.roomRequest + ') → ' + getAgreeDisagreeCode(data.roomRequest ? 'Agree' : 'Disagree'));
-    console.log(' 16. Seek assistance RHC (' + data.seekAssistanceRHC + ') → ' + getAgreeDisagreeCode(data.seekAssistanceRHC));
-    console.log(' 17. Seek assistance RA (' + data.seekAssistanceRA + ') → ' + getAgreeDisagreeCode(data.seekAssistanceRA));
-    console.log(' 18. Shared living agreement (' + data.useSharedLivingAgreement + ') → ' + getAgreeDisagreeCode(data.useSharedLivingAgreement));
-    console.log(' 19. Seek advice family (' + data.seekAdviceFamily + ') → ' + getAgreeDisagreeCode(data.seekAdviceFamily));
-    console.log(' 20. Initiate open communication (' + data.initiateOpenCommunication + ') → ' + getAgreeDisagreeCode(data.initiateOpenCommunication));
-    console.log(' 21. Roommate relationship (' + data.roommateRelationship + ') → ' + getRoommateRelationshipCode(data.roommateRelationship));
-    console.log(' 22. Suite occupants (' + data.suiteApartmentOccupants + ') → ' + getSuiteOccupantsCode(data.suiteApartmentOccupants));
-    console.log(' 23. Well-being resources (' + data.wellBeingResources + ') → ' + getWellBeingCode(data.wellBeingResources));
-
-    console.log('🔍 [FRONTEND DEBUG] All feature types:', features.map(f => typeof f));
-    console.log('🔍 [FRONTEND DEBUG] All features are numbers?', features.every(f => typeof f === 'number'));
-
-    // CONFIRMED: Model expects exactly 10 features (features 1-10 only)
-    // Features used by model:
-    // 1-4: Eating patterns (campus eatery, prepared meals, eating with friends, eating alone)
-    // 5: Nutritional confidence (1-5 scale)
-    // 6-10: Employment/Activities (jobs on/off campus, internships on/off campus, undergrad research)
-    console.log('✅ [FRONTEND DEBUG] Using first 10 features for model:', features.slice(0, 10));
-    console.log('📝 [FRONTEND DEBUG] Excluded features (11-23 - social/support data):', features.slice(10));
-    
-    // Return only the first 10 features that the model expects
-    return features.slice(0, 10);
-  };
 
   // Interpret SageMaker's raw prediction value
   const interpretSageMakerPrediction = (rawValue: number): {
@@ -418,9 +273,37 @@ export default function Home() {
     // Echo form data to console as JSON
     console.log('🔍 [FRONTEND DEBUG] Original form data:', JSON.stringify(formData, null, 2));
     
-    // Transform to model features and log
-    const modelFeatures = transformToModelFeatures(formData);
-    console.log('🔍 [FRONTEND DEBUG] Transformed model features:', modelFeatures);
+    // Build a row matching the shared schema and encode it
+    const schemaRow = {
+      'Eat at an on campus eatery (Food trucks, restaurants, food court)': formData.eatingHabits,
+      'Prepared a meal on my own': formData.preparedMealAlone,
+      'Eat with friends': formData.eatingWithFriends,
+      'Eat alone': formData.eatingAlone,
+      'how confident are you in preparing a nutritious, healthy meal for yourself?': formData.nutritionalConfidence,
+      'Worked a job on campus': formData.jobOnCampus ? 'Yes' : 'No',
+      'Worked a job off campus': formData.jobOffCampus ? 'Yes' : 'No',
+      'Participated in an internship off campus': formData.internshipOffCampus ? 'Yes' : 'No',
+      'Participated in an internship on campus': formData.internshipOnCampus ? 'Yes' : 'No',
+      'Participated in undergraduate research': formData.undergradResearch ? 'Yes' : 'No',
+      'How would you rate your mental health during the last 30 days?': formData.mentalHealthRating,
+      'I avoid conflict or confrontation, so I don\'t address the issue.': formData.avoidConfrontation ? 'Agree' : 'Disagree',
+      'Feeling a sense of belonging within the university community (Sense of belonging is the feeling that we have satisfied our emotional need to belong to a community or group because we feel accepted, included, respected, and supported by a group)': formData.senseOfBelonging,
+      'My roommate(s) and I do not have any conflicts': formData.roommateConflicts === 'Disagree' ? 'Agree' : 'Disagree',
+      'I have submitted a room switch request due to a roommate conflict': formData.roomRequest ? 'Agree' : 'Disagree',
+      'I seek assistance from my residence hall coordinator (RHC)': formData.seekAssistanceRHC,
+      'I seek assistance from my student leader (RA or CA)': formData.seekAssistanceRA,
+      'I use the Shared Living Agreement to guide discussion/conversation': formData.useSharedLivingAgreement,
+      'I seek advice from my parents or family': formData.seekAdviceFamily,
+      'I initiate open communication and discussion': formData.initiateOpenCommunication,
+      'In the last 30 days, how would you describe your relationship with your roommate(s)? - Selected Choice': formData.roommateRelationship,
+      'How many total people live in your suite or apartment unit?':
+        formData.suiteApartmentOccupants === 5
+          ? 'More than 5, including myself'
+          : `${formData.suiteApartmentOccupants}, including myself`
+    };
+
+    const modelFeatures = encodeRow(schemaRow);
+    console.log('🔍 [FRONTEND DEBUG] Encoded features:', modelFeatures);
     console.log('🔍 [FRONTEND DEBUG] Features array length:', modelFeatures.length);
     
     // Prepare payload for API
