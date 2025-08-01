@@ -72,4 +72,6 @@ data/                   # local CSVs or datasets
 ###############################################################################
 .DS_Store
 *.swp
-*.swo
+*.swomodel22/*.pth
+model22/model_config.json
+*.tar.gz
