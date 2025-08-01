@@ -78,3 +78,7 @@ model22/model_config.json
 model22/*.pth
 model22/model_config.json
 *.tar.gz
+bundle/model.pth
+model/model.pth
+shared/model/
+shared/student-risk-*.tar.gz
