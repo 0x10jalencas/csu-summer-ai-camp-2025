@@ -75,3 +75,6 @@ data/                   # local CSVs or datasets
 *.swomodel22/*.pth
 model22/model_config.json
 *.tar.gz
+model22/*.pth
+model22/model_config.json
+*.tar.gz
