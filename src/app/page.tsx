@@ -440,15 +440,30 @@ export default function Home() {
       
       console.log('🔍 [FRONTEND DEBUG] Response status:', response.status);
       console.log('🔍 [FRONTEND DEBUG] Response ok:', response.ok);
+      console.log('🔍 [FRONTEND DEBUG] Response headers:', response.headers);
+      console.log('🔍 [FRONTEND DEBUG] Response type:', response.type);
       
-      const prediction = await response.json();
-      console.log('🔍 [FRONTEND DEBUG] ============ API RESPONSE ============');
-      console.log('🔍 [FRONTEND DEBUG] Full prediction response:', JSON.stringify(prediction, null, 2));
+      // Check if response has content
+      const responseText = await response.text();
+      console.log('🔍 [FRONTEND DEBUG] Raw response text:', responseText);
+      console.log('🔍 [FRONTEND DEBUG] Response text length:', responseText.length);
+      
+      let prediction;
+      try {
+        prediction = responseText ? JSON.parse(responseText) : {};
+        console.log('🔍 [FRONTEND DEBUG] ============ API RESPONSE ============');
+        console.log('🔍 [FRONTEND DEBUG] Parsed prediction response:', JSON.stringify(prediction, null, 2));
+      } catch (parseError) {
+        console.error('🚨 [FRONTEND ERROR] Failed to parse JSON response:', parseError);
+        console.error('🚨 [FRONTEND ERROR] Raw text was:', responseText);
+        prediction = { error: 'Invalid JSON response', rawText: responseText };
+      }
       
       if (!response.ok) {
         console.error('🚨 [FRONTEND ERROR] API returned error status:', response.status);
         console.error('🚨 [FRONTEND ERROR] Error details:', prediction);
-        alert(`API Error (${response.status}): ${prediction.error || 'Unknown error'}`);
+        console.error('🚨 [FRONTEND ERROR] Response was empty?', Object.keys(prediction).length === 0);
+        alert(`API Error (${response.status}): ${prediction.error || 'Unknown error - check console for details'}`);
       } else {
         console.log('🔍 [FRONTEND DEBUG] ✅ API call successful!');
         

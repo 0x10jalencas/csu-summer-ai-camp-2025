@@ -12,9 +12,29 @@ import { InvokeEndpointCommand, SageMakerRuntimeClient } from '@aws-sdk/client-s
  * - SAGEMAKER_ENDPOINT_NAME
  */
 export async function POST(req: NextRequest) {
+  console.log('🔍 [API DEBUG] ============ API ROUTE STARTED ============');
+  
   try {
+    console.log('🔍 [API DEBUG] Request method:', req.method);
+    console.log('🔍 [API DEBUG] Request URL:', req.url);
+    console.log('🔍 [API DEBUG] Request headers:', Object.fromEntries(req.headers.entries()));
+    
     // Parse incoming JSON payload from the request body
-    const payload = await req.json();
+    console.log('🔍 [API DEBUG] Attempting to parse request body...');
+    let payload;
+    try {
+      payload = await req.json();
+      console.log('🔍 [API DEBUG] ✅ Successfully parsed request body');
+    } catch (parseError) {
+      console.error('🚨 [API ERROR] Failed to parse request body as JSON:', parseError);
+      return NextResponse.json({
+        error: 'Invalid JSON in request body',
+        debugError: {
+          message: 'Failed to parse request body as JSON',
+          parseError: parseError instanceof Error ? parseError.message : String(parseError)
+        }
+      }, { status: 400 });
+    }
     
     console.log('🔍 [API DEBUG] ============ PREDICTION REQUEST DEBUG ============');
     console.log('🔍 [API DEBUG] Received payload:', JSON.stringify(payload, null, 2));
@@ -33,15 +53,27 @@ export async function POST(req: NextRequest) {
 
     const region = process.env.AWS_REGION;
     const endpointName = process.env.SAGEMAKER_ENDPOINT_NAME ?? 'pytorch-inference-2025-08-01-02-22-44-558';
+    const mockMode = process.env.MOCK_PREDICTION;
+    const hasAwsCredentials = !!(process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY);
 
+    console.log('🔍 [API DEBUG] ============ ENVIRONMENT CHECK ============');
     console.log('🔍 [API DEBUG] AWS Region:', region);
     console.log('🔍 [API DEBUG] Endpoint Name:', endpointName);
-    console.log('🔍 [API DEBUG] Mock mode?', process.env.MOCK_PREDICTION);
+    console.log('🔍 [API DEBUG] Mock mode?:', mockMode);
+    console.log('🔍 [API DEBUG] Has AWS credentials?:', hasAwsCredentials);
+    console.log('🔍 [API DEBUG] AWS_ACCESS_KEY_ID exists?:', !!process.env.AWS_ACCESS_KEY_ID);
+    console.log('🔍 [API DEBUG] AWS_SECRET_ACCESS_KEY exists?:', !!process.env.AWS_SECRET_ACCESS_KEY);
 
     if (!region) {
+      console.error('🚨 [API ERROR] Missing AWS_REGION environment variable');
       return NextResponse.json(
         {
           error: 'AWS_REGION must be configured in environment variables.',
+          debug: {
+            region: region,
+            mockMode: mockMode,
+            hasCredentials: hasAwsCredentials
+          }
         },
         { status: 500 }
       );
@@ -119,29 +151,56 @@ export async function POST(req: NextRequest) {
     }
     
   } catch (error: unknown) {
-    const err = error as { message?: string; stack?: string; OriginalMessage?: string; ErrorCode?: string };
-    console.error('🚨 [API ERROR] ============ ALL ATTEMPTS FAILED ============');
-    console.error('🚨 [API ERROR] Final error:', error);
+    const err = error as { message?: string; stack?: string; OriginalMessage?: string; ErrorCode?: string; name?: string };
+    console.error('🚨 [API ERROR] ============ CAUGHT EXCEPTION ============');
+    console.error('🚨 [API ERROR] Error type:', typeof error);
+    console.error('🚨 [API ERROR] Error name:', err?.name);
     console.error('🚨 [API ERROR] Error message:', err?.message);
+    console.error('🚨 [API ERROR] Full error object:', error);
     console.error('🚨 [API ERROR] Error stack:', err?.stack);
     
     if (err?.OriginalMessage) {
       console.error('🚨 [API ERROR] SageMaker original message:', err.OriginalMessage);
     }
     
-    return NextResponse.json({ 
-      error: 'Failed to fetch prediction from SageMaker.',
-      debugError: {
-        message: err?.message || 'Unknown error',
-        originalMessage: err?.OriginalMessage,
-        errorCode: err?.ErrorCode,
-        stack: err?.stack,
-        suggestions: [
-          'Model expects 10 features based on matrix multiplication error',
-          'Check if model was trained with different feature set',
-          'Verify feature encoding matches training data'
-        ]
-      }
-    }, { status: 500 });
+    // Determine if this is a parsing error, AWS error, or other
+    let errorCategory = 'unknown';
+    if (err?.message?.includes('JSON')) {
+      errorCategory = 'json_parsing';
+    } else if (err?.message?.includes('AWS') || err?.ErrorCode) {
+      errorCategory = 'aws_sagemaker';
+    } else if (err?.message?.includes('fetch') || err?.message?.includes('network')) {
+      errorCategory = 'network';
+    }
+    
+    console.error('🚨 [API ERROR] Error category:', errorCategory);
+    
+    try {
+      const errorResponse = NextResponse.json({ 
+        error: 'Failed to fetch prediction from SageMaker.',
+        errorCategory: errorCategory,
+        debugError: {
+          message: err?.message || 'Unknown error',
+          originalMessage: err?.OriginalMessage,
+          errorCode: err?.ErrorCode,
+          name: err?.name,
+          stack: err?.stack,
+          timestamp: new Date().toISOString(),
+          suggestions: [
+            'Check browser console and terminal for detailed error logs',
+            'Verify environment variables are set correctly',
+            'Ensure AWS credentials are valid',
+            'Check if SageMaker endpoint is running'
+          ]
+        }
+      }, { status: 500 });
+      
+      console.log('🔍 [API DEBUG] Returning error response:', errorResponse);
+      return errorResponse;
+    } catch (responseError) {
+      console.error('🚨 [API ERROR] Failed to create error response:', responseError);
+      // Fallback to a simple response if JSON creation fails
+      return new Response('Internal Server Error', { status: 500 });
+    }
   }
 }
