@@ -1,4 +1,4 @@
-import schema from "@/lib/feature_schema.json";
+import schema from "../../../shared/feature_schema.json";
 
 type RawRow = Record<string, any>;
 type FeatureSpec = (typeof schema)["features"][number];
