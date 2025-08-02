@@ -3,7 +3,7 @@
 -->
 
 <p align="center">
-  <img src="public/media/banner.jpg" alt="Predicting Attrition Through Housing Data banner" width="50%">
+  <img src="docs/media/banner.jpg" alt="Predicting Attrition Through Housing Data banner" width="50%">
 </p>
 <p align="center">
   <a href="#"><img alt="Next.js"       src="https://img.shields.io/badge/next.js-14-black"></a>
@@ -17,8 +17,8 @@
 </p>
 
 <p align="center">
-  <img src="public/media/aws_logo.png" alt="Predicting Attrition Through Housing Data banner" width="6.5%">
-  <img src="public/media/dxhub_logo.png" alt="Predicting Attrition Through Housing Data banner" width="6.5%">
+  <img src="docs/media/aws_logo.png" alt="Predicting Attrition Through Housing Data banner" width="6.5%">
+  <img src="docs/media/dxhub_logo.png" alt="Predicting Attrition Through Housing Data banner" width="6.5%">
 </p>
 
 # Predicting Student Attrition Through Housing Data
@@ -34,16 +34,12 @@ A Sigmoid neuron–based predictive model built and trained on San Diego State U
 
 ```mermaid
 graph LR
-  A[Client Frontend<br/>Dashboard] -->|Request| B[SageMaker API<br/>Endpoint]
+  A[Client Frontend<br/>Dashboard] <--> B[SageMaker API<br/>Endpoint]
 
   subgraph Backend
-    B -->|Invoke| C[SageMaker AI]
-    C -->|Read/Write| D[Amazon S3]
-    C -->|Result| B
+    B --> C[SageMaker AI]
+    C --> D[Amazon S3]
   end
-
-  B -->|Response| A
-
 
 ```
 
@@ -55,27 +51,44 @@ graph LR
 
 ```
 .
-├── .git/              # Git version control metadata
-├── .gitignore         # Specifies files and folders Git should ignore
-├── .next/             # Next.js build output (auto-generated)
-├── node_modules/      # Installed dependencies (auto-generated)
-├── public/            # Static assets (images, fonts, etc.)
-├── src/               # Application source code (pages, components, styles, etc.)
-├── package.json       # Project manifest (scripts, dependencies, metadata)
-├── package-lock.json  # Lockfile to ensure exact dependency versions
-├── tsconfig.json      # TypeScript configuration
-├── next.config.ts     # Next.js configuration file
-├── postcss.config.mjs # PostCSS setup (e.g., Tailwind CSS plugins)
-├── eslint.config.mjs  # Linting rules and config
-├── next-env.d.ts      # Auto-generated Next.js TypeScript types
-├── README.md          # Project overview and setup instructions
+├── .git/                    # Git metadata (version control)
+├── .gitignore               # create to ignores node_modules, venv, .env, etc.
+├── README.md                # Project overview / instructions
+├── package.json             # Root manifest (if used for tooling or workspaces)
+├── package-lock.json        # Lockfile for JS dependencies
+├── node_modules/            # JS dependencies (auto-generated)
+├── shared/                  # Shared code / utilities
+├── frontend/                # Next.js + TypeScript app
+│   ├── eslint.config.mjs
+│   ├── next-env.d.ts
+│   ├── next.config.ts
+│   ├── postcss.config.mjs
+│   ├── tsconfig.json
+│   ├── package.json
+│   ├── node_modules/        # frontend-specific deps (could be deduped)
+│   ├── public/              # Static assets
+│   └── src/                 # Application source (pages, components, etc.)
+└── backend/                 # Python / ML inference & deployment
+    ├── bundle/
+    ├── data/
+    ├── deploy_to_sagemaker.py
+    ├── ml/
+    ├── model/
+    ├── requirements.txt
+    ├── simple_inference/
+    ├── simple_model.py
+    ├── test_simple_inference.py
+    └── venv/               # Python virtual environment (should be gitignored)
+
+
 ```
 
-## Deploy
+## Prerequisites
 
-1. Install Node.js 20 and Python 3.11.  
-2. Configure AWS credentials in .env.local at the project root:: AWS_ACCESS_KEY_ID, AWS_SECRET_KEY, AWS_REGION, SAGEMAKER_ENDPOINT_NAME
-3. Build and deploy backend
+1. Install Node.js 20 and Python 3.9+.  
+2. Configure AWS credentials in .env.local at the project root: AWS_ACCESS_KEY_ID, AWS_SECRET_KEY, AWS_REGION, SAGEMAKER_ENDPOINT_NAME
+3. Configure an Amazon Sagemaker AI endpoint (via Jupyter Notebook or deploy_to_sagemaker.py)
+4. Email [jalencas@calpoly.edu](mailto:jalencas@calpoly.edu) for the cleaned .csv file to put into an Amazon S3 bucket.
 
 ## Local Development
 
@@ -96,9 +109,27 @@ graph LR
 3. **Start the frontend:**
 ```bash
 # Front end
+cd frontend
 npm install
 npm run dev
 ```
+
+4. **Start the backend:**
+```bash
+# Backend
+cd backend
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+python simple_model.py
+npm install
+npm run dev
+```
+## Screenshots
+
+|              Home              |              Student Form              |       Risk Analysis Dashboard       |         Model Output & Raw JSON        |
+|:-----------------------------:|:--------------------------------------:|:-----------------------------------:|:--------------------------------------:|
+| ![Home](docs/media/home.png) | ![Form](docs/media/form.png)          | ![Analysis](docs/media/analysis.png) | ![Model](docs/media/model.png)         |
 
 ## License
 
