@@ -42,7 +42,7 @@ class CsvDataset(Dataset):
         df[label_col] = df[label_col].astype(float)
         # use shared Encoder to convert categorical strings to numeric codes
         # feature_schema.json lives in project_root/shared
-        schema_path = Path(__file__).resolve().parent / "shared/feature_schema.json"
+        schema_path = Path(__file__).resolve().parent.parent / "shared/feature_schema.json"
         enc = Encoder(schema_path)
         # apply shared Encoder row‑wise
         numeric_rows = df.apply(lambda row: enc.transform_row(row.to_dict()), axis=1).to_list()

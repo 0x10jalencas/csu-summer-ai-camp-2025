@@ -125,16 +125,16 @@ export default function Home() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('🔍 [FRONTEND DEBUG] ============ FORM SUBMISSION START ============');
+    console.log('[FRONTEND DEBUG] ============ FORM SUBMISSION START ============');
     
     if (!formData.rowId.trim()) {
-      console.log('🔍 [FRONTEND DEBUG] ❌ Missing RowID, stopping submission');
+      console.log('[FRONTEND DEBUG] Missing RowID, stopping submission');
       alert('Please enter a Student RowID');
       return;
     }
     
     // Echo form data to console as JSON
-    console.log('🔍 [FRONTEND DEBUG] Original form data:', JSON.stringify(formData, null, 2));
+    console.log('[FRONTEND DEBUG] Original form data:', JSON.stringify(formData, null, 2));
     
     // Build a row matching the shared schema and encode it
     const schemaRow = {
@@ -166,17 +166,17 @@ export default function Home() {
     };
 
     const modelFeatures = encodeRow(schemaRow);
-    console.log('🔍 [FRONTEND DEBUG] Encoded features:', modelFeatures);
-    console.log('🔍 [FRONTEND DEBUG] Features array length:', modelFeatures.length);
+    console.log('[FRONTEND DEBUG] Encoded features:', modelFeatures);
+    console.log('[FRONTEND DEBUG] Features array length:', modelFeatures.length);
     
     // Prepare payload for API
     const apiPayload = { features: modelFeatures };
-    console.log('🔍 [FRONTEND DEBUG] API payload:', JSON.stringify(apiPayload, null, 2));
+    console.log('[FRONTEND DEBUG] API payload:', JSON.stringify(apiPayload, null, 2));
     
     // Call the prediction API
     try {
-      console.log('🔍 [FRONTEND DEBUG] ============ CALLING API ============');
-      console.log('🔍 [FRONTEND DEBUG] Making fetch request to /api/predict...');
+      console.log('[FRONTEND DEBUG] ============ CALLING API ============');
+      console.log('[FRONTEND DEBUG] Making fetch request to /api/predict...');
       
       const response = await fetch('/api/predict', {
         method: 'POST',
@@ -184,46 +184,46 @@ export default function Home() {
         body: JSON.stringify(apiPayload)
       });
       
-      console.log('🔍 [FRONTEND DEBUG] Response status:', response.status);
-      console.log('🔍 [FRONTEND DEBUG] Response ok:', response.ok);
-      console.log('🔍 [FRONTEND DEBUG] Response headers:', response.headers);
-      console.log('🔍 [FRONTEND DEBUG] Response type:', response.type);
+      console.log('[FRONTEND DEBUG] Response status:', response.status);
+      console.log('[FRONTEND DEBUG] Response ok:', response.ok);
+      console.log('[FRONTEND DEBUG] Response headers:', response.headers);
+      console.log('[FRONTEND DEBUG] Response type:', response.type);
       
       // Check if response has content
       const responseText = await response.text();
-      console.log('🔍 [FRONTEND DEBUG] Raw response text:', responseText);
-      console.log('🔍 [FRONTEND DEBUG] Response text length:', responseText.length);
+      console.log('[FRONTEND DEBUG] Raw response text:', responseText);
+      console.log('[FRONTEND DEBUG] Response text length:', responseText.length);
       
       let prediction;
       try {
         prediction = responseText ? JSON.parse(responseText) : {};
-        console.log('🔍 [FRONTEND DEBUG] ============ API RESPONSE ============');
-        console.log('🔍 [FRONTEND DEBUG] Parsed prediction response:', JSON.stringify(prediction, null, 2));
+        console.log('[FRONTEND DEBUG] ============ API RESPONSE ============');
+        console.log('[FRONTEND DEBUG] Parsed prediction response:', JSON.stringify(prediction, null, 2));
       } catch (parseError) {
-        console.error('🚨 [FRONTEND ERROR] Failed to parse JSON response:', parseError);
-        console.error('🚨 [FRONTEND ERROR] Raw text was:', responseText);
+        console.error('[FRONTEND ERROR] Failed to parse JSON response:', parseError);
+        console.error('[FRONTEND ERROR] Raw text was:', responseText);
         prediction = { error: 'Invalid JSON response', rawText: responseText };
       }
       
       if (!response.ok) {
-        console.error('🚨 [FRONTEND ERROR] API returned error status:', response.status);
-        console.error('🚨 [FRONTEND ERROR] Error details:', prediction);
-        console.error('🚨 [FRONTEND ERROR] Response was empty?', Object.keys(prediction).length === 0);
+        console.error('[FRONTEND ERROR] API returned error status:', response.status);
+        console.error('[FRONTEND ERROR] Error details:', prediction);
+        console.error('[FRONTEND ERROR] Response was empty?', Object.keys(prediction).length === 0);
         alert(`API Error (${response.status}): ${prediction.error || 'Unknown error - check console for details'}`);
       } else {
-        console.log('🔍 [FRONTEND DEBUG] ✅ API call successful!');
+        console.log('[FRONTEND DEBUG] API call successful!');
         
         // Store prediction result for dashboard
         setPredictionResult(prediction);
       }
       
     } catch (error) {
-      console.error('🚨 [FRONTEND ERROR] ============ FETCH ERROR ============');
-      console.error('🚨 [FRONTEND ERROR] Network/fetch error:', error);
+      console.error('[FRONTEND ERROR] ============ FETCH ERROR ============');
+      console.error('[FRONTEND ERROR] Network/fetch error:', error);
       alert('Network error: Failed to reach prediction API. Check console for details.');
     }
     
-    console.log('🔍 [FRONTEND DEBUG] ============ SHOWING DASHBOARD ============');
+    console.log('[FRONTEND DEBUG] ============ SHOWING DASHBOARD ============');
     setShowDashboard(true);
   };
 
