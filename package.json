@@ -1,0 +1,31 @@
+{
+  "name": "csu-summer-ai-camp-2025-fullstack",
+  "version": "1.0.0",
+  "description": "Full-stack Student Risk Analysis application - Frontend (Next.js) + Backend (Python/ML)",
+  "scripts": {
+    "dev": "concurrently --kill-others-on-fail \"npm run dev:frontend\" \"npm run dev:backend\"",
+    "dev:frontend": "echo 'Starting frontend...' && cd frontend && npm run dev",
+    "dev:backend": "echo 'Starting backend...' && cd backend && python3 -m http.server 8001",
+    "setup": "npm run setup:frontend && npm run setup:backend",
+    "setup:frontend": "cd frontend && npm install",
+    "setup:backend": "cd backend && pip install -r requirements.txt",
+    "build": "cd frontend && npm run build",
+    "start": "cd frontend && npm start",
+    "lint": "cd frontend && npm run lint"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "workspaces": [
+    "frontend"
+  ],
+  "keywords": [
+    "nextjs",
+    "python",
+    "ml",
+    "sagemaker",
+    "student-analytics"
+  ],
+  "author": "CSU Summer AI Camp 2025",
+  "license": "MIT"
+}
