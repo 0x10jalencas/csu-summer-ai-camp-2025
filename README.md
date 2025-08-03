@@ -6,15 +6,20 @@
   <img src="docs/media/banner.jpg" alt="Predicting Attrition Through Housing Data banner" width="50%">
 </p>
 <p align="center">
+  <!-- Front-end -->
   <a href="#"><img alt="Next.js"       src="https://img.shields.io/badge/next.js-14-black"></a>
   <a href="#"><img alt="React"         src="https://img.shields.io/badge/react-18-blue"></a>
   <a href="#"><img alt="TailwindCSS"   src="https://img.shields.io/badge/tailwindcss-3.x-38BDF8"></a>
   <a href="#"><img alt="Python"        src="https://img.shields.io/badge/python-3.11-yellow"></a>
+  <a href="#"><img alt="NumPy"         src="https://img.shields.io/badge/numpy-013243?logo=numpy&logoColor=white"></a>
+  <a href="#"><img alt="pandas"        src="https://img.shields.io/badge/pandas-150458?logo=pandas&logoColor=white"></a>
+  <a href="#"><img alt="scikit-learn"  src="https://img.shields.io/badge/scikit--learn-F7931E?logo=scikit-learn&logoColor=white"></a>
   <a href="#"><img alt="AWS Lambda"    src="https://img.shields.io/badge/aws%20lambda-Serverless-orange"></a>
   <a href="#"><img alt="SageMaker"     src="https://img.shields.io/badge/sagemaker-ML-blue"></a>
   <a href="#"><img alt="Jupyter"       src="https://img.shields.io/badge/jupyter-Notebook-F37626"></a>
   <a href="#"><img alt="License"       src="https://img.shields.io/badge/license-MIT-green"></a>
 </p>
+
 
 <p align="center">
   <img src="docs/media/aws_logo.png" alt="Predicting Attrition Through Housing Data banner" width="6.5%">
@@ -130,6 +135,67 @@ npm run dev
 |              Home              |              Student Form              |       Risk Analysis Dashboard       |         Model Output & Raw JSON        |
 |:-----------------------------:|:--------------------------------------:|:-----------------------------------:|:--------------------------------------:|
 | ![Home](docs/media/home.png) | ![Form](docs/media/form.png)          | ![Analysis](docs/media/analysis.png) | ![Model](docs/media/model.png)         |
+
+## Model Development
+
+### 1.  Data pipeline
+
+| Stage | Tooling | What happens |
+|-------|---------|--------------|
+| **Raw CSV to Notebook** | Jupyter (Python 3.11) | Import AY 23-24 OHA survey responses. |
+| **Cleaning** | `pandas` | Filter for 23 columns (referred to as features), and drop <25% of empty respondent information, impute the rest with mode (categorical) or median (numeric). |
+| **Feature engineering** | `sklearn.preprocessing` | *Ordinal* answers scaled to \[0, 1\]; *categorical* answers one-hot encoded. |
+| **Vector assembly** | custom | Each row ➜ **22-D NumPy vector** preserved as `float32`. |
+| **Artifact storage** | Amazon S3 | Cleaned feature matrix (`cleaned_22d.csv`) + label column (`attrition=1/0`). |
+
+### 2.  Why a single sigmoid neuron?
+
+Because we are answering the binary question (yes/no) of whether or not a student has left SDSU housing or not, a single sigmoid neuron cleanly outputs a probability in [0,1] that maps directly to that outcome. Its tiny parameter footprint further minimizes over-fitting and keeps real-time inference costs negligible as well.
+
+| Requirement | How the sigmoid model meets it |
+|-------------|--------------------------------|
+| **Interpretability** – housing staff need to see *why* a student is flagged. | Each weight `w_i` directly reflects the contribution of feature *i*. This allows for scalability.|
+| **Small-ish dataset** – one academic year of survey data. | A shallow model avoids overfitting and trains in seconds. |
+| **Low-latency inference (dashboard clicks)** | Forward pass is just a dot-product and a `σ`; < 1 ms on t3.large. |
+
+Alternative models we tried:
+
+| Model | F1-score | Notes |
+|-------|---------:|-------|
+| Logistic Regression | 0.84 | Similar math, but a bit less stable on rare categories. |
+| Random Forest | 0.82 | Better on noisy features but slower on opaque feature importances. |
+| **Sigmoid Neuron** | **0.86** | Highest F1 with the simplest deploy. |
+
+
+### 3. Mathematical formulation
+
+The model is a one-layer neural network with a sigmoid activation:
+
+$$
+\hat{y} = \sigma(W \cdot X + b), \qquad 
+\sigma(z) = \frac{1}{1 + e^{-z}}
+$$
+
+* Standardized feature vector: $$X \in \mathbb{R}^{22}$$
+* Learnable weight vector: $$W \in \mathbb{R}^{22}$$
+* Bias term: $$b \in \mathbb{R}$$
+* Attrition probability: $$\hat{y} \in (0,1)$$
+
+The loss we minimize is the binary cross-entropy:
+
+$$
+\mathcal{L}(y, \hat{y}) = -\left( y \log \hat{y} + (1 - y)\log(1 - \hat{y}) \right)
+$$
+
+Training is done with mini-batch gradient descent using `sklearn.linear_model.SGDClassifier` with `loss="log_loss"`.
+
+### 4.  Training & evaluation
+
+```bash
+# Reproduce locally
+cd backend/ml
+python train_sigmoid.py --csv s3://.../cleaned_22d.csv
+```
 
 ## License
 
